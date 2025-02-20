@@ -1,105 +1,64 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions
-from selenium.common.exceptions import TimeoutException
-
-import os
-import pickle
-from time import sleep
-
-CONTACT_FILE_PATH = 'contacts.pkl'
-WHATSAPP_CONTACT_LINK = 'https://wa.me/'
-INITIATE_CHAT_BUTTON_XPATH = '//*[@id="action-button"]'
-ACCESS_WHATSAPP_WEB_BUTTON_XPATH = '//*[@id="fallback_block"]/div/div/h4[2]/a'
-QR_CODE_WHATSAPP_XPATH = '//*[@id="app"]/div/div[2]/div[2]/div[1]/div/div/div[2]/div[2]'
-TYPE_BAR_XPATH = '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div[2]/div/p'
-SEND_MESSAGE_BUTTON_XPATH = '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[2]/button'
-
-navigator : webdriver.Chrome = ''
-contact_list : list = list()
-
-#gerenciamento de arquivos
-
-def read_file() -> list:
-
-    with open(CONTACT_FILE_PATH, 'rb') as file:
-        file_data = pickle.load(file)
-
-    file.close()
-
-    return file_data
-    
-
-def write_file():
-    with open(CONTACT_FILE_PATH, 'wb') as file:
-        pickle.dump(file)
-    
-    file.close()
-
-def check_if_contact_file_exists():
-    return os.path.isfile(CONTACT_FILE_PATH)
-
-
-def create_contact_file():
-    with open(CONTACT_FILE_PATH, w) as file:
-        file.write("")
-        
-    file.close()
-
-
-#gerenciamento do whatsapp
-def initiate_navigator_driver() -> webdriver.Chrome:
-
-    chromeOptions = Options()
-    chromeOptions.add_experimental_option("detach", True)
-
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chromeOptions)
-
-    return driver
-
-
-def send_messages_to(number : str, messages : list):
-
-    navigator.get(WHATSAPP_CONTACT_LINK + number)
-    navigator.find_element(By.XPATH, INITIATE_CHAT_BUTTON_XPATH).click()
- 
-    WebDriverWait(navigator, 300).until(
-        expected_conditions.visibility_of_element_located((By.XPATH, ACCESS_WHATSAPP_WEB_BUTTON_XPATH))
-    )
-
-    navigator.find_element(By.XPATH, ACCESS_WHATSAPP_WEB_BUTTON_XPATH).click()
-
-    sleep(10)
-
-    WebDriverWait(navigator, 300).until(
-        expected_conditions.invisibility_of_element_located((By.XPATH, QR_CODE_WHATSAPP_XPATH))
-    )
-
-    #Manda as mensagens para o contato
-    for message in messages:
-        type_message(message)
-        sleep(7)
-
-
-
-def type_message(message : str):
-
-    WebDriverWait(navigator, 300).until(
-        expected_conditions.visibility_of_element_located((By.XPATH, TYPE_BAR_XPATH))
-    )
-
-    navigator.find_element(By.XPATH, TYPE_BAR_XPATH).send_keys(message)
-    navigator.find_element(By.XPATH, SEND_MESSAGE_BUTTON_XPATH).click()
-
-
-
+import PySimpleGUI as sg
 
 #inicio do código    
-navigator = initiate_navigator_driver()
-send_messages_to('5591986345975', ["Olá, me chamo Liedson dos Reis Pereira", "Mensagem de teste", "Caso tenha interesse entre em contato"])
+
+sg.theme("LightGrey1")
+
+INPUT_COLOR = '#EAF1F1'
+DEFAULT_WHITE = '#FFFBFB'
+TYPOGRAPHY_FONT ='./assets/RobotoCondensed-VariableFont_wght.ttf'
+
+"""
+Cria um input padronizado no código
+"""
+def create_input(label_text : str, key_name : str):
+    
+    return [
+        [sg.Text(label_text, font=(TYPOGRAPHY_FONT, 16))],
+        [sg.Input(key=key_name, background_color=(INPUT_COLOR), font=(TYPOGRAPHY_FONT, 12), do_not_clear=False, pad=(6,6))]
+    ]
+
+"""
+Cria um textarea padronizado no código
+"""
+def create_text_area(label_text : str, key_name : str):
+    
+    return [
+        [sg.Text(label_text, font=(TYPOGRAPHY_FONT, 16))],
+        [sg.Multiline(key=key_name, background_color=(INPUT_COLOR), font=(TYPOGRAPHY_FONT, 12), do_not_clear=False, justification='left', autoscroll=False, size=(40, 10), pad=(6,6))]
+    ]
+
+
+
+create_form_layout = [
+
+    [sg.Text(text='Criar Contato', font=(TYPOGRAPHY_FONT, 22, 'bold') )],
+    [sg.VerticalSeparator()],    
+    [sg.VerticalSeparator()],    
+    [create_input('Nome', '--NAME--')],
+    [sg.VerticalSeparator()],
+    [sg.VerticalSeparator()],
+    [create_input('Celular', '--CELLPHONE--')],
+    [sg.VerticalSeparator()],
+    [sg.VerticalSeparator()],
+    [create_text_area('Mensagem', '--MESSAGE--')],
+    [sg.VerticalSeparator()],
+    [sg.VerticalSeparator()],
+    [
+        sg.Button(button_text='Salvar'),
+        sg.Button(button_text='Cancelar')
+    ]
+    
+]
+
+layout = [
+    [create_form_layout]
+]
+
+janela = sg.Window("WhatsApp Automation", layout=layout, font=(TYPOGRAPHY_FONT), size=(800,500), margins=(30,30), background_color=(DEFAULT_WHITE))
+
+while True:
+    eventos, valores = janela.read()
+
+    if eventos in (sg.WIN_CLOSED, "sair"):
+        break
