@@ -17,6 +17,25 @@ TYPOGRAPHY_FONT ='./assets/RobotoCondensed-VariableFont_wght.ttf'
 
 contact_list = dict() #Dicionário de contatos
 
+def create_main_layout():
+    
+    return [
+
+        [sg.VPush()],
+        [
+            sg.Frame(title='', layout=[
+                [sg.Button(button_color=DEFAULT_WHITE,image_filename="./assets/img/new_contact.png", border_width=0, key='--NOVO_CONTATO_BUTTON--')],
+                [sg.Text(text='Novo Contato (+)', font=(TYPOGRAPHY_FONT, 14, 'normal'), enable_events=True, key='--NOVO_CONTATO_TEXT--')],
+            ], element_justification='center', relief=sg.RELIEF_FLAT, background_color=DEFAULT_WHITE),
+
+            sg.Frame(title='', layout=[
+                [sg.Button(button_color=DEFAULT_WHITE,image_filename="./assets/img/send_message.png", border_width=0, key='--ENVIAR_MESAGEM_BUTTON--')],
+                [sg.Text(text='Enviar Mensagens', font=(TYPOGRAPHY_FONT, 14, 'normal'), enable_events=True, key='--ENVIAR_MESAGEM_TEXT--')],
+            ], element_justification='center', relief=sg.RELIEF_FLAT, background_color=DEFAULT_WHITE),
+        ],
+        [sg.VPush()]
+    ]
+
 def create_contact_card(name : str, contact : str, id : str):
 
     return [sg.Frame(title="", layout=[
@@ -65,8 +84,8 @@ list_contacts_layout = [
 layout = [
 
     [
-        sg.Column(layout=list_contacts_layout, background_color=DEFAULT_WHITE, expand_x=True, expand_y=True,scrollable=True, vertical_scroll_only=True, sbar_relief=sg.RELIEF_FLAT, key='--CONTACT_LIST--'),
-        sg.Column(layout=create_insert_contact_form(), background_color=DEFAULT_WHITE, expand_x=True, expand_y=True, p=((50,50), (20,20)), key='--RIGHT_SIDE--')
+        sg.Column(layout=list_contacts_layout, background_color=DEFAULT_WHITE, expand_x=True, expand_y=True,scrollable=True, vertical_scroll_only=True, sbar_background_color=SAVE_BUTTON_COLOR,sbar_relief=sg.RELIEF_FLAT, key='--CONTACT_LIST--'),
+        sg.Column(layout=create_main_layout(), background_color=DEFAULT_WHITE, expand_x=True, expand_y=True, p=((50,50), (20,20)), key='--RIGHT_SIDE--')
     ]
 ]
 
