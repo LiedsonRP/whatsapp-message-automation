@@ -17,25 +17,6 @@ TYPOGRAPHY_FONT ='./assets/RobotoCondensed-VariableFont_wght.ttf'
 
 contact_list = dict() #Dicionário de contatos
 
-def create_main_layout():
-    
-    return [
-
-        [sg.VPush()],
-        [
-            sg.Frame(title='', layout=[
-                [sg.Button(button_color=DEFAULT_WHITE,image_filename="./assets/img/new_contact.png", border_width=0, key='--NOVO_CONTATO_BUTTON--')],
-                [sg.Text(text='Novo Contato (+)', font=(TYPOGRAPHY_FONT, 14, 'normal'), enable_events=True, key='--NOVO_CONTATO_TEXT--')],
-            ], element_justification='center', relief=sg.RELIEF_FLAT, background_color=DEFAULT_WHITE),
-
-            sg.Frame(title='', layout=[
-                [sg.Button(button_color=DEFAULT_WHITE,image_filename="./assets/img/send_message.png", border_width=0, key='--ENVIAR_MESAGEM_BUTTON--')],
-                [sg.Text(text='Enviar Mensagens', font=(TYPOGRAPHY_FONT, 14, 'normal'), enable_events=True, key='--ENVIAR_MESAGEM_TEXT--')],
-            ], element_justification='center', relief=sg.RELIEF_FLAT, background_color=DEFAULT_WHITE),
-        ],
-        [sg.VPush()]
-    ]
-
 def create_contact_card(name : str, contact : str, id : str):
 
     return [sg.Frame(title="", layout=[
@@ -47,10 +28,24 @@ def create_contact_card(name : str, contact : str, id : str):
 
     ], border_width=1, relief=sg.RELIEF_SUNKEN, expand_x=True)]
 
+main_layout = [
 
-def create_insert_contact_form():
-    
-    return [
+    [sg.VPush()],
+    [
+        sg.Frame(title='', layout=[
+            [sg.Button(button_color=DEFAULT_WHITE,image_filename="./assets/img/new_contact.png", border_width=0, key='--NOVO_CONTATO_BUTTON--')],
+            [sg.Text(text='Novo Contato (+)', font=(TYPOGRAPHY_FONT, 14, 'normal'), enable_events=True, key='--NOVO_CONTATO_TEXT--')],
+    ], element_justification='center', relief=sg.RELIEF_FLAT, background_color=DEFAULT_WHITE),
+
+        sg.Frame(title='', layout=[
+            [sg.Button(button_color=DEFAULT_WHITE,image_filename="./assets/img/send_message.png", border_width=0, key='--ENVIAR_MESAGEM_BUTTON--')],
+            [sg.Text(text='Enviar Mensagens', font=(TYPOGRAPHY_FONT, 14, 'normal'), enable_events=True, key='--ENVIAR_MESAGEM_TEXT--')],
+    ], element_justification='center', relief=sg.RELIEF_FLAT, background_color=DEFAULT_WHITE),
+    ],
+    [sg.VPush()]
+]
+
+insert_contact_form = [
     
         [sg.Text(text='Criar Contato', font=(TYPOGRAPHY_FONT, 18, 'bold') )],
         [sg.HorizontalSeparator(color=SAVE_BUTTON_COLOR)],
@@ -66,7 +61,7 @@ def create_insert_contact_form():
 
         [
             sg.Push(),
-            sg.Button(button_text='Salvar', button_color=(DEFAULT_TEXT_COLOR, SAVE_BUTTON_COLOR), mouseover_colors=HOVER_SAVE_BUTTON_COLOR, size=(15,2), border_width=0, key='--SAVE--'),
+            sg.Button(button_text='Salvar', button_color=(DEFAULT_TEXT_COLOR, SAVE_BUTTON_COLOR), mouseover_colors=HOVER_SAVE_BUTTON_COLOR, size=(15,2), border_width=0, key='--INSERT_SAVE--'),
             sg.Button(button_text='Cancelar', button_color=(DEFAULT_TEXT_COLOR, CANCEL_BUTTON_COLOR), size=(15,2), border_width=0, key='--CANCEL--'),
             sg.Push(),
         ],
@@ -85,7 +80,8 @@ layout = [
 
     [
         sg.Column(layout=list_contacts_layout, background_color=DEFAULT_WHITE, expand_x=True, expand_y=True,scrollable=True, vertical_scroll_only=True, sbar_background_color=SAVE_BUTTON_COLOR,sbar_relief=sg.RELIEF_FLAT, key='--CONTACT_LIST--'),
-        sg.Column(layout=create_main_layout(), background_color=DEFAULT_WHITE, expand_x=True, expand_y=True, p=((50,50), (20,20)), key='--RIGHT_SIDE--')
+        sg.Column(layout=main_layout, background_color=DEFAULT_WHITE, expand_x=True, expand_y=True, p=((50,50), (20,20)), key='--MAIN_MENU--'),
+        sg.Column(layout=insert_contact_form, background_color=DEFAULT_WHITE, expand_x=True, expand_y=True, p=((50,50), (20,20)), key='--INSERT_CONTACT--', visible=False),
     ]
 ]
 
@@ -94,8 +90,25 @@ janela = sg.Window("WhatsApp Automation", layout=layout, font=(TYPOGRAPHY_FONT),
 while True:
     eventos, valores = janela.read()
 
-    print(eventos)
-    print(valores)
-
     if eventos in (sg.WIN_CLOSED, "sair"):
         break
+
+    #Evento para acessar a tela de cadastro de contatos
+    if eventos in ['--NOVO_CONTATO_BUTTON--', '--NOVO_CONTATO_TEXT--']:
+        janela['--MAIN_MENU--'].update(visible=False)
+        janela['--INSERT_CONTACT--'].update(visible=True)
+
+    #Evento que retornar da tela de cadastro para o menu principal
+    if eventos in ['--CANCEL--']:
+        
+        resp = sg.Popup('Você deseja cancelar o cadastro? Esta ação é irreversivel!', no_titlebar=True, button_type=sg.POPUP_BUTTONS_OK_CANCEL, button_color=SAVE_BUTTON_COLOR, )
+
+        if (resp in 'OK'):
+            janela['--INSERT_CONTACT--'].update(visible=False)
+            janela['--NAME--'].update(value='')
+            janela['--CELLPHONE--'].update(value='')
+            janela['--MESSAGE--'].update(value='')
+            janela['--MAIN_MENU--'].update(visible=True)
+        
+        else:
+            pass
